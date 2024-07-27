@@ -1,0 +1,95 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/plugins/fontawesome/css/all.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/css/class_list.css' %}" type="text/css" rel="stylesheet"/>
+    <script src="{% static 'js/class_list.js' %}"></script>
+
+    <meta charset="UTF-8">
+    <title>class List</title>
+</head>
+<body>
+    <h1 id="title">課程列表</h1>
+    <div id="sort">
+        <div id="select_by_age">
+            <label for="gradeFilter">篩選年級:</label>
+            <select id="gradeFilter" onchange="filterByGrade()">
+                <option value="all">全部</option>
+                <option value="國一">國一</option>
+                <option value="國二">國二</option>
+                <option value="國三">國三</option>
+                <option value="高一">高一</option>
+                <option value="高二">高二</option>
+                <option value="高三">高三</option>
+                <option value="其他">其他</option>
+            </select>
+        </div>
+
+        <div id="select_by_year">
+            <label for="yearFilter">篩選年級:</label>
+            <select id="yearFilter" onchange="filterByGrade()">
+                <option value="all">全部</option>
+                <option value="113">113</option>
+                <option value="112">112</option>
+            </select>
+        </div>
+
+
+
+    </div>
+
+    <div id="add_class_div">
+        <a id="add_class" class="btn btn-success" href="{% url 'add_class' %}">新增課程</a>
+    </div>
+
+    <div class="class_list">
+        {% for i in class_list %}
+            <div class="classes">
+                <p class="class_title bold">
+                    <a href="{% url 'class_detail' cId=i.cId %}">
+                        {{ i.category }}
+                        {% if i.subject%}
+                            - {{ i.subject }}
+                        {% endif %}
+                    </a>
+                </p>
+                <p><span class="subtitle bold">年級</span>
+                    <span class="years_old">
+                        {% spaceless %}
+                            {% if i.years_old %}
+                                {{ i.years_old }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% endspaceless %}
+                    </span>
+                </p>
+                <p><span class="subtitle bold">年度</span><span class="year">{{ i.year }}</span></p>
+                <p><span class="subtitle bold">時間</span>星期{{ i.day }}   {{ i.time }}</p>
+                <p><span class="subtitle bold">授課老師</span>{{ i.teacher_name }}</p>
+                <p><span class="subtitle bold">名額</span>{{ i.quota }}</p>
+                <p><span class="subtitle bold">剩餘名額</span>
+                    {% if i.remain == 0 %}
+                        <span class="red">額滿</span>
+                    {% else %}
+                        <span class="green bold">{{ i.remain }}</span>
+                    {% endif %}
+                </p>
+
+                <div id="edit_delete_button">
+                    <a class="btn btn-blue" href="{% url 'class_detail' cId=i.cId %}">詳情</a>
+                    <a class="btn btn-blue" href="{% url 'add_enroll' cId=i.cId %}">新增學員</a>
+                    <a class="btn btn-info" href="{% url 'edit_class' cId=i.cId %}">編輯</a>
+                    <a class="btn btn-danger" href="">刪除</a>
+                </div>
+
+            </div>
+
+        {% endfor %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href= "{%static '/css/student_detail.css' %}" type="text/css" rel="stylesheet"/>
+    <script src="{% static 'js/student_detail.js' %}"></script>
+
+    <meta charset="UTF-8">
+    <title>{{ student_detail.name }}</title>
+
+</head>
+<body>
+    <h1>{{ student_detail.name }}</h1>
+
+    <div class="accordion">
+
+
+        <input type="checkbox" id="info" class="accordion-input" checked/>
+        <label for="info" class="accordion-button active"><span class="arrow">&#9660; </span>學生資訊</label>
+        <div class="accordion-content">
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="bold">編號</td>
+                        <td>{{ student_detail.sId }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">年級</td>
+                        <td>{{ tingkat|get_item:student_detail.years_old }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">電話號碼</td>
+                        <td>{{ student_detail.hp }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">家長姓名</td>
+                        <td>{{ student_detail.parent_name }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">家長電話號碼</td>
+                        <td>{{ student_detail.parent_hp }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">學校</td>
+                        <td>{{ student_detail.school }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">生日日期</td>
+                        <td>{{ student_detail.birthday }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">備注</td>
+                        <td>{{ student_detail.remark }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="bold">地址</td>
+                        <td>{{ student_detail.address }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <input type="checkbox" id="courses" class="accordion-input" checked/>
+        <label for="courses" class="accordion-button active"><span class="arrow">&#9660; </span>參與的課程</label>
+        <div class="accordion-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>課名</th>
+                        <th>年度</th>
+                        <th>時間</th>
+                        <th>學習狀況</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for i in class_taken %}
+                        <tr>
+                            <td class="classname bold">
+                                <a class="class_title" href="{% url 'class_detail' cId=i.cId %}">
+                                    {{ i.category }}
+                                    {% if i.subject%}
+                                        - {{ i.subject }}
+                                    {% endif %}
+                                </a>
+                            </td>
+                            <td class="year">{{ i.year }}</td>
+                            <td class="time">星期{{ i.day }}   {{ i.time }}</td>
+                            <td class="remark">{{ i.remark }}</td>
+                        </tr>
+
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+</div>
+</body>
+</html>

@@ -1,10 +1,68 @@
+{% load static %}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href= "{%static '/css/student_list.css' %}" type="text/css" rel="stylesheet"/>
+    <script src="{% static 'js/student_list.js' %}"></script>
+
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>學生資訊</title>
 </head>
+
 <body>
+    <h1>學生資訊</h1>
+
+    <div id="select_by_age">
+        <label for="gradeFilter">篩選年級:</label>
+        <select id="gradeFilter" onchange="filterByGrade()">
+            <option value="">全部</option>
+            <option value="國一">國一</option>
+            <option value="國二">國二</option>
+            <option value="國三">國三</option>
+            <option value="高一">高一</option>
+            <option value="高二">高二</option>
+            <option value="高三">高三</option>
+            <option value="其他">其他</option>
+        </select>
+    </div>
+
+    {% load custom_filters %}
+    <table class="student_list">
+        <thead>
+            <tr>
+                <th>姓名</th>
+                <th>年級</th>
+                <th>學校</th>
+                <th>備注</th>
+                <th>詳情</th>
+
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i in student_list %}
+                    <tr class="student">
+                        <td class="name bold">
+                            <a class="title" href="{% url 'student_detail' sId=i.sId %}" target="_blank">
+                                {{ i.name }}
+                            </a>
+                        </td>
+                        <td class="years_old">{{ tingkat|get_item:i.years_old }}</td>
+                        <td class="school">{{ i.school }}</td>
+                        <td class="remark">{{ i.remark }}</td>
+                        <td class="detail">
+                            <a href="{% url 'student_detail' sId=i.sId %}" target="_blank">
+                                <img class="new_window" src="{% static '/img/new_window.png' %}" alt="新頁面">
+                            </a>
+                        </td>
+                    </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+
 
 </body>
 </html>
