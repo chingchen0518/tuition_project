@@ -8,8 +8,6 @@ body {
 .student_list{
     display:flex;
     flex-wrap: wrap;
-
-
 }
 
 .student_name{

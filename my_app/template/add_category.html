@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -5,55 +7,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>新增課堂類別</title>
   <!-- 引入 Bootstrap CSS -->
-  <link href="../static/css/bootstrap_css/bootstrap.min.css" rel="stylesheet">
+    <link href= "{%static '/css/bootstrap_css/bootstrap.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/css/bootstrap_css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+
   <!-- 自定义样式 -->
   <style>
     body {
         background-color: #f8f8f8;
     }
 
+    #title{
+        margin-top:100px;
+    }
   </style>
 </head>
 
 <body>
+    {% include 'elements/navbar.html' %}
 
-<div class="container">
-  <!-- 本頁面標題 -->
-  <h1 class="mt-5">新增課堂類別</h1>
+    <div class="container">
+      <!-- 本頁面標題 -->
+      <h1 id="title">新增課堂類別</h1>
 
-  <form id="add_category" method="POST" action="{% url 'add_category_action' %}">
-      {% csrf_token %}
+      <form id="add_category" method="POST" action="{% url 'add_category_action' %}">
+          {% csrf_token %}
 
-    <div class="accordion" id="accordion">
-      <div class="accordion-item">
+        <div class="accordion" id="accordion">
+          <div class="accordion-item">
 
-        <!-- 簡介(下拉式列表) -->
-        <h2 class="accordion-header" id="introduction-heading">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#introduction" aria-expanded="true" aria-controls="introduction">
-            課堂類別
-          </button>
-        </h2>
-        <div id="introduction" class="accordion-collapse collapse show" aria-labelledby="introduction-heading" data-bs-parent="#accordion">
-          <div class="accordion-body">
+            <!-- 簡介(下拉式列表) -->
+            <h2 class="accordion-header" id="introduction-heading">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#introduction" aria-expanded="true" aria-controls="introduction">
+                課堂類別
+              </button>
+            </h2>
+            <div id="introduction" class="accordion-collapse collapse show" aria-labelledby="introduction-heading" data-bs-parent="#accordion">
+              <div class="accordion-body">
 
-            <div class="mb-3 row">
-              <div class="col-4">
-                <label for="category" class="form-label">課堂類別名稱：</label>
-                <input type="text" class="form-control" id="category" name="category" required>
+                <div class="mb-3 row">
+                  <div class="col-4">
+                    <label for="category" class="form-label">課堂類別名稱：</label>
+                    <input type="text" class="form-control" id="category" name="category" required>
+                  </div>
+                </div>
+
               </div>
             </div>
-
           </div>
         </div>
-      </div>
-    </div>
 
-        <!-- 上傳表單按鈕 -->
-    <div class="d-flex justify-content-center mt-3">
-      <input type="submit" class="btn btn-primary" value="新增">
+            <!-- 上傳表單按鈕 -->
+        <div class="d-flex justify-content-center mt-3">
+          <input type="submit" class="btn btn-primary" value="新增">
+        </div>
+      </form>
     </div>
-  </form>
-</div>
 
 <!-- 引入 Bootstrap JS -->
 <script src="../static/js/bootstrap_js/bootstrap.min.js"></script>

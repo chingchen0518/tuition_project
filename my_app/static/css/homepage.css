@@ -1,0 +1,25 @@
+
+#timetable{
+    width:90%;
+    margin-left:5%;
+    margin-right:5%;
+}
+
+.day{
+    width:10%;
+}
+
+.class_list{
+    width: 40%;
+    padding:20px;
+}
+
+.every_class{
+    font-size: 30px;
+    margin-left:2%
+}
+
+#title{
+    margin-top:100px;
+    text-align: center;
+}

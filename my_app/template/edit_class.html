@@ -7,22 +7,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>新增课程</title>
   <!-- 引入 Bootstrap CSS -->
-  <link href="../static/css/bootstrap_css/bootstrap.min.css" rel="stylesheet">
+    <link href= "{%static '/css/bootstrap_css/bootstrap.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/css/bootstrap_css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
 
   <!-- 自定义样式 -->
   <style>
     body {
         background-color: #f8f8f8;
     }
-
+    #title{
+        margin-top:100px;
+    }
   </style>
 </head>
 
 <body>
+    {% include 'elements/navbar.html' %}
 
 <div class="container">
   <!-- 本頁面標題 -->
-  <h1 class="mt-5">編輯课程</h1>
+  <h1 id="title">編輯课程</h1>
 
   <form id="add_class" method="POST" action="{% url 'edit_class_action' cId=class_detail.cId %}">
       {% csrf_token %}
@@ -115,9 +120,9 @@
                 <!-- 時間 -->
               <div class="col-3">
                 <label for="time" class="form-label" >時間</label>
-                <div class="custom-select">
+{#                <div class="custom-select">#}
                     <input type="time" id="time" class="form-control" name="time" value="{{ class_detail.time |time:"H:i" }}" required>
-                </div>
+{#                </div>#}
               </div>
 
               <div class="col-3">

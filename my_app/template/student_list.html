@@ -1,9 +1,11 @@
 {% load static %}
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href= "{%static '/css/bootstrap_css/bootstrap.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="../static/css/bootstrap_css/bootstrap.min.css" rel="stylesheet">
     <link href= "{%static '/css/student_list.css' %}" type="text/css" rel="stylesheet"/>
     <script src="{% static 'js/student_list.js' %}"></script>
 
@@ -12,20 +14,50 @@
 </head>
 
 <body>
-    <h1>學生資訊</h1>
+    {% include 'elements/navbar.html' %}
 
-    <div id="select_by_age">
-        <label for="gradeFilter">篩選年級:</label>
-        <select id="gradeFilter" onchange="filterByGrade()">
-            <option value="">全部</option>
-            <option value="國一">國一</option>
-            <option value="國二">國二</option>
-            <option value="國三">國三</option>
-            <option value="高一">高一</option>
-            <option value="高二">高二</option>
-            <option value="高三">高三</option>
-            <option value="其他">其他</option>
-        </select>
+    <h1 id="title">學生資訊</h1>
+
+    <div id="toolbar" class="mb-6 row">
+
+        <div id="select_by_age" class="col-3">
+            <label for="gradeFilter">篩選年級:</label>
+            <select id="gradeFilter">
+                <option value="all">全部</option>
+                <option value="國一">國一</option>
+                <option value="國二">國二</option>
+                <option value="國三">國三</option>
+                <option value="高一">高一</option>
+                <option value="高二">高二</option>
+                <option value="高三">高三</option>
+                <option value="其他">其他</option>
+            </select>
+        </div>
+
+        <div class="form-check col-4 payment_filter">
+            <div class="">
+                <input class="form-check-input" type="radio" name="payment" id="flexRadioDefault1" value="所有學生" checked>
+                <label class="form-check-label" for="flexRadioDefault1">所有學生</label>
+            </div>
+
+            <div class="">
+                <input class="form-check-input payment_filter_radio" type="radio" name="payment" id="flexRadioDefault2" value="已繳費">
+                <label class="form-check-label" for="flexRadioDefault2">已繳費</label>
+            </div>
+
+            <div class="">
+                <input class="form-check-input" type="radio" name="payment" id="flexRadioDefault3" value="未繳費">
+                <label class="form-check-label" for="flexRadioDefault3">未繳費</label>
+            </div>
+        </div>
+
+        <div class="col-1"></div>
+
+        <div class="col-3 order-last">
+            <div class="">
+                <input type="text" id="searchInput" placeholder="搜索學生" class="form-control">
+            </div>
+        </div>
     </div>
 
     {% load custom_filters %}
@@ -36,6 +68,7 @@
                 <th>年級</th>
                 <th>學校</th>
                 <th>備注</th>
+                <th>繳費</th>
                 <th>詳情</th>
 
             </tr>
@@ -51,7 +84,14 @@
                         </td>
                         <td class="years_old">{{ tingkat|get_item:i.years_old }}</td>
                         <td class="school">{{ i.school }}</td>
-                        <td class="remark">{{ i.remark }}</td>
+                        <td class="remark">{{ i.remarks }}</td>
+                        <td class="payment">
+                            {% if i.fully_paid == 1 %}
+                                <span style="color:Green" class="sudah">&#10004;</span>
+                            {% else %}
+                                 <span style="color:Red" class="belum">X</span>
+                            {% endif %}
+                        </td>
                         <td class="detail">
                             <a href="{% url 'student_detail' sId=i.sId %}" target="_blank">
                                 <img class="new_window" src="{% static '/img/new_window.png' %}" alt="新頁面">
@@ -65,4 +105,28 @@
 
 
 </body>
+
+<script>
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    var searchValue = this.value.toLowerCase();
+    var paragraphs = document.getElementsByClassName('student');
+    {#var br= document.getElementsByClassName('break_of_checkbox')#}
+
+    console.log(paragraphs.length)
+
+    for (var i = 0; i < paragraphs.length; i++) {
+        var text = paragraphs[i].innerText.toLowerCase();
+
+        if (text.includes(searchValue)) {
+            paragraphs[i].style.display = 'table-row';
+            {#br[i].style.display = 'block';#}
+        } else {
+            paragraphs[i].style.display = 'none';
+            {#br[i].style.display = 'none';#}
+
+        }
+    }
+});
+</script>
+
 </html>

@@ -5,9 +5,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>新增课程</title>
+  <title>新增課程</title>
   <!-- 引入 Bootstrap CSS -->
-  <link href="../static/css/bootstrap_css/bootstrap.min.css" rel="stylesheet">
+    <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/plugins/fontawesome/css/all.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/css/bootstrap_css/bootstrap.css' %}" type="text/css" rel="stylesheet"/>
 
   <!-- 自定义样式 -->
   <style>
@@ -15,14 +17,18 @@
         background-color: #f8f8f8;
     }
 
+    #title{
+        margin-top:100px;
+    }
   </style>
 </head>
 
 <body>
+    {% include 'elements/navbar.html' %}
 
 <div class="container">
   <!-- 本頁面標題 -->
-  <h1 class="mt-5">新增课程</h1>
+  <h1 id="title">新增課程</h1>
 
   <form id="add_class" method="POST" action="{% url 'add_class_action' %}">
       {% csrf_token %}
@@ -113,16 +119,21 @@
               </div>
 
                 <!-- 時間 -->
-              <div class="col-3">
+              <div class="col-2">
                 <label for="time" class="form-label" >時間</label>
-                <div class="custom-select">
+{#                <div class="custom-select">#}
                     <input type="time" id="time" class="form-control" name="time" required>
-                </div>
+{#                </div>#}
               </div>
 
-              <div class="col-3">
+              <div class="col-2">
                 <label for="quota" class="form-label">名額：</label>
                 <input type="number" id="quota" class="form-control" name="quota" placeholder="名額" max="99" required>
+              </div>
+
+              <div class="col-2">
+                <label for="class_period" class="form-label">名額：</label>
+                <input type="number" id="class_period" class="form-control" name="class_period" placeholder="期數" max="5" required>
               </div>
 
             </div>

@@ -29,6 +29,8 @@ class Class(models.Model):
     quota = models.IntegerField(default=0)
     crId = models.ForeignKey(Classroom, on_delete=models.CASCADE, to_field='crId', auto_created=False, unique=False,default='0')
     tId = models.ForeignKey(Teacher, to_field='tId',  on_delete=models.CASCADE, auto_created=False, default=0)
+    periods = models.IntegerField(default=1)
+    available = models.IntegerField(default=1)
 
     class Meta:
         db_table = 'Class'
@@ -42,16 +44,18 @@ class Students(models.Model):
     years_old = models.IntegerField(default=0)
     school = models.CharField(default="-", null=False, max_length=20)
     birthday = models.DateField(null=True,blank=True)
-    remark=models.TextField(default="-", null=True, max_length=1000)
+    remarks=models.TextField(default="-", null=True, max_length=1000)
     address = models.CharField(default="-", null=True, max_length=100)
 
     class Meta:
         db_table = 'Students'
 
 class Enrolled(models.Model):
+    eId = models.AutoField(primary_key=True)
     sId = models.ForeignKey(Students, on_delete=models.CASCADE, to_field='sId', auto_created=False, unique=False, default=0)
     cId = models.ForeignKey(Class, on_delete=models.CASCADE, to_field='cId', auto_created=False, unique=False,default=0)
     remark=models.TextField(default="-", null=True, max_length=1000)
+    period = models.IntegerField(default=1)
     class Meta:
         db_table = 'Enrolled'
 
@@ -60,3 +64,12 @@ class Category(models.Model):
     category=models.CharField(default="-", null=True, max_length=1000)
     class Meta:
         db_table = 'Category'
+
+class Payment(models.Model):
+    eId=models.ForeignKey(Enrolled, on_delete=models.CASCADE, to_field='eId', auto_created=False, unique=False, default=0)
+    sId=models.ForeignKey(Students, on_delete=models.CASCADE, to_field='sId', auto_created=False, unique=False, default=0)
+    cId=models.ForeignKey(Class, on_delete=models.CASCADE, to_field='cId', auto_created=False, unique=False, default=0)
+    amount=models.IntegerField(default=0)
+    date=models.DateField(null=True,blank=True)
+    class Meta:
+        db_table = 'Payment'

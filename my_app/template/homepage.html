@@ -1,17 +1,60 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>補習班首頁</title>
+    <link href= "{%static '/css/bootstrap_css/bootstrap.css' %}" type="text/css" rel="stylesheet"/>
+    <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="../static/css/bootstrap_css/bootstrap.min.css" rel="stylesheet">
+    <link href= "{%static '/css/homepage.css' %}" type="text/css" rel="stylesheet"/>
+
 </head>
 <body>
-    <p>student</p>
-    <p><a href="{% url 'class_list' %}">Class List</a></p>
-    <p><a href="{% url 'student_list' %}">Student List</a></p>
-    <p><a href="{% url 'add_category' %}">add_category</a></p>
-    <p><a href="{% url 'add_class' %}">add_class</a></p>
-
-    <p><a href="{% url 'add_teacher' %}">add_teacher</a></p>
+<p>123</p>
+    {% include 'elements/navbar.html' %}
+    <h1 id="title">補習班首頁</h1>
+    <table id="timetable" class="table table-bordered">
+        <thead>
+        <tr>
+          <th scope="col" class="fs-4 text-center bg-light">星期</th>
+          <th scope="col" class="fs-4 text-center bg-light">上午</th>
+          <th scope="col" class="fs-4 text-center bg-light">下午</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for days in Days %}
+        <tr>
+          <th class="day fs-4 text-center" scope="row">{{ days }}</th>
+           {#上午班#}
+           <td class="class_list">
+            {% for i in class %}
+              {% if i.morning and i.day == days%}
+                <p class="every_class">
+                    <span class="bg-primary text-white p-1 border border-primary rounded">{{ i.years_old }}</span>
+                    {{ i.category }} - {{ i.subject }}
+                    <span class="bg-danger text-white p-1 border border-danger rounded">{{ i.time |date:"H:i"}}</span>
+                </p>
+              {% endif %}
+            {% endfor %}
+          </td>
+           {#下午班#}
+           <td class="class_list">
+                {% for i in class %}
+                  {% if i.morning == 0 and i.day == days%}
+                    <p class="every_class">
+                        <span class="bg-primary text-white p-1 border border-primary rounded">{{ i.years_old }}</span>
+                        {{ i.category }} - {{ i.subject }}
+                        <span class="bg-danger text-white p-1 border border-danger rounded">{{ i.time |date:"H:i"}}</span>
+                    </p>
+                  {% endif %}
+                {% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
 
 </body>
 </html>

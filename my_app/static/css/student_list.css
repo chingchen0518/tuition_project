@@ -12,10 +12,9 @@ body {
     padding: 20px;
 }
 
-h1 {
+#title{
+    margin-top:100px;
     text-align: center;
-    margin-bottom: 20px;
-    color: #333333; /* Dark grey color for the title */
 }
 
 label {
@@ -125,6 +124,11 @@ table.student_list tr:hover {
     color: Black;
 }
 
+.payment{
+    width: 5%;
+    text-align: center;
+}
+
 .detail{
     width: 5%;
     text-align: center;
@@ -133,3 +137,15 @@ table.student_list tr:hover {
 .title:hover{
     color: #0808cb;
 }
+
+
+#toolbar{
+    margin-bottom:10px;
+}
+
+.payment_filter{
+    margin:10px;
+    display:flex;
+    justify-content: space-around;
+}
+

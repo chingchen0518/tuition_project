@@ -28,7 +28,10 @@ p {
 }
 
 #title{
+    margin-top:100px;
     margin-left:50px;
+    margin-bottom:50px;
+    text-align: center;
 }
 
 .class_list {
@@ -106,17 +109,19 @@ a:hover{
 label {
     font-weight: bold;
     margin-right: 10px;
-    font-size: 20px;
+    font-size: 30px;
     color: #333;
 }
 
 #select_by_age,#select_by_year{
-    margin:10px;
+    /*margin:10px;*/
     margin-left:50px;
+    font-size: 30px;
 }
 
 #sort{
     display:flex;
+    /*margin-top:20px;*/
 }
 
 #gradeFilter,#yearFilter,#categoryFilter {
@@ -135,8 +140,19 @@ option{
     font-size:20px;
 }
 
-#add_class{
-    margin-left:90%;
+#available_filter{
+    display:flex;
+    justify-content: space-around;
+    padding-top:5px;
+}
+
+.toolbar{
+    display:flex;
+    justify-content: space-between;
+    margin:10px;
+}
+.form-check-label{
+    font-size:30px;
 }
 
 #add_class_div{
@@ -152,4 +168,18 @@ option{
 
 #edit_delete_button>a{
     margin:5px;
+}
+
+#search_bar{
+    /*margin-top:5px;*/
+}
+
+.class_title{
+    display:flex;
+    justify-content: space-between
+}
+
+.class_name{
+    padding-bottom: 9px;
+    padding-top: 9px;
 }

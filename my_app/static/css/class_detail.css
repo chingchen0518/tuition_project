@@ -42,6 +42,7 @@ p {
 }
 
 table {
+    width: 100%;
     border-collapse: collapse;
     margin-top: 0px;
 }
@@ -151,4 +152,14 @@ th {
     text-align: center;
 }
 
+#student_list{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
+#add_enroll{
+    margin:5px;
+    font-size: 25px;
+    margin-left: auto;
+}
