@@ -1,5 +1,9 @@
 from django.shortcuts import HttpResponse, render, redirect
 import json,os
+from django.db.models import Max
+from datetime import datetime, timedelta
+
+
 from django.http import JsonResponse
 from django.db import connection
 
@@ -7,20 +11,21 @@ from django.shortcuts import render
 import pdb
 
 #include table
-from my_app.models import Students, Enrolled, Class, Classroom, Teacher,Category,Payment
+from my_app.models import Students, Enrolled, Class, Classroom, Teacher,Category,Payment,Time
+from my_app.models import Semester
 
 # Create your views here.
 def homepage(request):
-    class_list = Class.objects.raw('''SELECT cId,time,years_old,subject,category,day,available,
-                                        CASE
-                                            WHEN (time>'12:59') THEN 0
-                                            ELSE 1
-                                            END AS morning
-                                        FROM Class
+    class_list = Class.objects.raw('''SELECT DISTINCT cId,time,years_old,subject,category,day,available,start
+                                        FROM Class JOIN Time ON Class.time=Time.start
                                         WHERE available=1
                                         ORDER BY time''')
+
+    classroom=[1,2,3,4,5,6]
     Days=['一','二','三','四','五','六','日']
-    return render(request, 'homepage.html',{'class':class_list,'Days':Days})
+
+    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY sequence')
+    return render(request, 'homepage.html',{'class':class_list,'Days':Days,'time':time,'classroom':classroom})
 
 
 def student_list(request):
@@ -38,7 +43,7 @@ def student_list(request):
                                                         ) THEN 0
                                                 ELSE 1
                                         END AS fully_paid
-                                        FROM Students s''')
+                                        FROM Students s ORDER BY years_old''')
 
     tingkat = ['xxx','國一','國二','國三','高一','高二','高三']
 
@@ -49,26 +54,39 @@ def student_detail(request,sId):
     tingkat = ['xxx','國一','國二','國三','高一','高二','高三']
     class_taken= Class.objects.raw('''SELECT year,eId,cId,day,time,remark,period,subject,category,Enrolled.cId_id,
                                         CASE
-                                            WHEN (SELECT COUNT(amount) AS payment FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId) = 1 THEN 1
-                                            WHEN (SELECT COUNT(amount) AS payment FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId) = 2 THEN 2
+                                            WHEN (SELECT COUNT(amount) AS payment FROM Payment WHERE sId_id=5 AND Payment.eId_id=Enrolled.eId) > 0 THEN (SELECT COUNT(amount) FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId)
                                             ELSE 0
                                         END AS payment
                                         FROM Enrolled
                                         JOIN Class ON Class.cId = Enrolled.cId_id
                                         WHERE Enrolled.sId_id = %s
-                                        ''',(sId,sId,sId))
+                                        ''',(sId,sId))
 
     return render(request, 'student_detail.html',{'student_detail': student_detail[0],'tingkat':tingkat,'class_taken':class_taken})
 
-
 def class_list(request,available):
-    # class_list = Teacher.objects.raw('SELECT * FROM Teacher JOIN Class ON Class.tId_id = Teacher.tId JOIN ')
-    class_list = Teacher.objects.raw('''SELECT Class.*, Teacher.*, COALESCE(enrolled_counts.tuple_count, 0) AS student_count,Class.quota - COALESCE(enrolled_counts.tuple_count, 0) AS remain
+
+    class_list = Teacher.objects.raw('''SELECT Class.*, Teacher.*,Semester.*, COALESCE(enrolled_counts.tuple_count, 0) AS student_count,Class.quota - COALESCE(enrolled_counts.tuple_count, 0) AS remain
                                         FROM Class LEFT JOIN Teacher ON Class.tId_id = Teacher.tId
                                         LEFT JOIN (SELECT cId_id, COUNT(*) AS tuple_count FROM Enrolled GROUP BY cId_id
-                                        ) AS enrolled_counts ON enrolled_counts.cId_id = Class.cId WHERE available=%s;''',[available])
-    # remain =
-    return render(request, 'class_list.html',{'class_list': class_list,'available':available})
+                                        ) AS enrolled_counts ON enrolled_counts.cId_id = Class.cId 
+                                        JOIN Semester ON Semester.semId=Class.year 
+                                        WHERE available=%s
+                                        ORDER BY year DESC,
+                                                CASE day
+                                                    WHEN '一' THEN 1
+                                                    WHEN '二' THEN 2
+                                                    WHEN '三' THEN 3
+                                                    WHEN '四' THEN 4
+                                                    WHEN '五' THEN 5
+                                                    WHEN '六' THEN 6
+                                                    ELSE 7
+                                                END,time
+                                        ;''',[available])
+
+    semester = Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
+
+    return render(request, 'class_list_table.html', {'class_list': class_list, 'available':available,'semester':semester})
 
 def class_detail(request,cId):
     class_detail = Teacher.objects.raw('''SELECT Class.*, Teacher.*,Classroom.classroom_name, COALESCE(enrolled_counts.tuple_count, 0) AS student_count,Class.quota - COALESCE(enrolled_counts.tuple_count, 0) AS remain
@@ -100,7 +118,10 @@ def add_class(request):
     teacher = Teacher.objects.raw('SELECT tId,teacher_name FROM Teacher')
     classroom = Classroom.objects.raw('SELECT * FROM Classroom')
 
-    return render(request, 'add_class.html',{'categories':category,'teachers':teacher,'classrooms':classroom})
+    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY start')
+    year = Semester.objects.raw('SELECT * FROM Semester WHERE semId=(SELECT MAX(semId) FROM Semester)')
+
+    return render(request, 'add_class.html',{'categories':category,'teachers':teacher,'classrooms':classroom,'time':time,'years':year[0]})
 
 def add_class_action(request):
     category = request.POST['category']
@@ -119,15 +140,23 @@ def add_class_action(request):
     cId = latest_id + 1
 
     with connection.cursor() as cursor:
-        cursor.execute('INSERT INTO Class VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)', (cId,category,subject,time,year,quota,classroom,teacher,day,years_old,class_period))
-    return redirect('/')#back to homepage
+        cursor.execute('INSERT INTO Class VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)', (cId,category,subject,time,year,quota,classroom,teacher,day,years_old,class_period,1))
+
+    return redirect('/class_list/1')#back to homepage
 
 def edit_class(request,cId):
     class_detail = Class.objects.raw('SELECT * FROM Class WHERE cId=%s',[cId])
     category = Category.objects.raw('SELECT * FROM Category')
-    teacher = Teacher.objects.raw('SELECT tId,teacher_name FROM Teacher')
+    teacher = Teacher.objects.raw('SELECT * FROM Teacher')
     classroom = Classroom.objects.raw('SELECT * FROM Classroom')
-    return render(request, 'edit_class.html',{'class_detail':class_detail[0],'categories':category,'teachers':teacher,'classrooms':classroom})
+
+    class_year = Class.objects.raw('SELECT * FROM Class WHERE cId=%s',[cId])[0].year
+
+    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=%s ORDER BY start',[class_year])
+
+    year = Semester.objects.raw('SELECT * FROM Semester WHERE semId=%s',[class_year])
+
+    return render(request, 'edit_class.html',{'class_detail':class_detail[0],'categories':category,'teachers':teacher,'classrooms':classroom,'time':time,'years':year[0]})
 
 def edit_class_action(request,cId):
     category = request.POST['category']
@@ -139,10 +168,14 @@ def edit_class_action(request,cId):
     teacher= request.POST['teacher']
     day = request.POST['day']
     years_old = request.POST['age']
+    class_period = request.POST['class_period']
 
     with connection.cursor() as cursor:
-        cursor.execute('UPDATE Class SET category=%s, subject=%s, time=%s, year=%s, quota=%s, crId_id=%s, tId_id=%s, day=%s, years_old=%s WHERE cId=%s', (category,subject,time,year,quota,classroom,teacher,day,years_old,cId))
-    return redirect('/')#back to homepage
+        cursor.execute('UPDATE Class SET category=%s, subject=%s, time=%s, year=%s, quota=%s, crId_id=%s, tId_id=%s, day=%s, years_old=%s,periods=%s WHERE cId=%s', (category,subject,time,year,quota,classroom,teacher,day,years_old,class_period,cId,))
+
+    class_detail = f'/class_detail/{cId}'
+
+    return redirect(class_detail)#back to homepage
 
 def delete_class_action(request,cId):
     Class.objects.filter(cId=cId).delete()
@@ -159,6 +192,42 @@ def recover_class_action(request,cId):
     with connection.cursor() as cursor:
         cursor.execute('UPDATE Class SET available=1 WHERE cId=%s',[cId])
     return redirect('/class_list/0')  # back to homepage
+
+def copy_class(request,cId):
+    class_detail = Class.objects.raw('SELECT * FROM Class WHERE cId=%s', [cId])
+    category = Category.objects.raw('SELECT * FROM Category')
+    teacher = Teacher.objects.raw('SELECT * FROM Teacher')
+    classroom = Classroom.objects.raw('SELECT * FROM Classroom')
+
+    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY sequence')
+    year = Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
+
+    return render(request, 'copy_class.html',
+                  {'class_detail': class_detail[0], 'categories': category, 'teachers': teacher,
+                   'classrooms': classroom, 'time': time, 'years': year[0]})
+
+def copy_class_action(request):
+    category = request.POST['category']
+    subject = request.POST['subject']
+    time = request.POST['time']
+    year = request.POST['year']
+    quota = request.POST['quota']
+    classroom = request.POST['classroom']
+    teacher = request.POST['teacher']
+    day = request.POST['day']
+    years_old = request.POST['age']
+    class_period = request.POST['class_period']
+
+    latest_id = Class.objects.latest('cId')
+    latest_id = latest_id.cId
+    cId = latest_id + 1
+
+    with connection.cursor() as cursor:
+        cursor.execute('INSERT INTO Class VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)', (cId,category,subject,time,year,quota,classroom,teacher,day,years_old,class_period,1))
+
+    class_detail = f'/class_detail/{cId}'
+
+    return redirect(class_detail)  # back to homepaged
 
 
 def add_teacher(request):
@@ -200,7 +269,9 @@ def add_enroll_action(request,cId):
         with connection.cursor() as cursor:
             cursor.execute('INSERT INTO Enrolled VALUES (%s, %s, %s, %s,%s)', (latest_id,cId,i,"-",period))
 
-    return redirect('/')#back to homepage
+    class_detail=f'/class_detail/{cId}'
+
+    return redirect(class_detail)#back to homepage
 
 def delete_enrolled_student(request,sId,cId):
 
@@ -244,26 +315,43 @@ def upload_payment(request,eId):
                                   ''',[eId])
     return render(request, 'upload_payment.html',{'student':students[0]})
 
+def get_file_extension(uploaded_file):
+    filename, file_extension = os.path.splitext(uploaded_file.name)
+    return file_extension.lower()
+
 def upload_payment_action(request,eId,sId,cId):
     amount=request.POST['amount'];
     date=request.POST['date'];
 
+
     if request.method == 'POST' and request.FILES['receipt']:
         file = request.FILES['receipt']
+        file_extension=get_file_extension(file)
+
+        # 看這堂課有幾個payment
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT COUNT(amount) AS num FROM Payment WHERE Payment.sId_id=%s AND Payment.eId_id=%s',(sId,eId))
+            latest_payment = cursor.fetchall()
+            latest_payment = latest_payment[0][0]+1
+
+        # 看學生名字
+        students = Students.objects.raw('SELECT sId,name FROM Students WHERE sId=%s',[sId])
+        student_name = students[0].name
+
         # 設置文件上傳的目錄
         upload_dir = 'my_app/static/img/receipt/'
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
         # 構造新的文件路徑，將文件名更改為 "xxx"
 
-        new_file_path = f'{upload_dir}{1}_receipt.pdf'
+        new_file_path = f'{upload_dir}{student_name}_{eId}_{latest_payment}{file_extension}'
         # 寫入文件到指定目錄
         with open(new_file_path, 'wb+') as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
 
-    with connection.cursor() as cursor:
-        cursor.execute('INSERT INTO Payment (eId_id,cId_id,sId_id,date,amount) VALUES  (%s,%s,%s,%s,%s)', (eId, cId, sId,date,amount))
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO Payment (eId_id,cId_id,sId_id,date,amount) VALUES  (%s,%s,%s,%s,%s)', (eId, cId, sId,date,amount))
 
     previous_page = f'/student_detail/{sId}'
     return redirect(previous_page)#back to homepage
@@ -310,4 +398,65 @@ def edit_student_action(request,sId):
     student_detail=f'/student_detail/{sId}'
     return redirect(student_detail)#back to homepage
 
+def add_time(request):
+    years=Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
+    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY start')
 
+    return render(request, 'add_time.html',{'years':years[0],'time':time})
+
+def add_time_action(request,years):
+    start  = request.POST['start']
+    start_str = datetime.strptime(start , '%H:%M')
+
+    end_str = start_str + timedelta(hours=2)
+    end = end_str.strftime('%H:%M')
+
+    # latest_sequence = Time.objects.raw('SELECT * FROM Time WHERE semId_id=%s ORDER BY sequence DESC',[years])[0]
+    #
+    # if latest_sequence.exists():
+    #     next_sequence = latest_sequence.sequence + 1
+    # else:
+
+    next_sequence = 1
+
+
+    latest_timeId = Time.objects.raw('SELECT * FROM Time ORDER BY tId DESC')[0]
+    next_timeId = latest_timeId.tId+1
+
+    with connection.cursor() as cursor:
+        cursor.execute('INSERT INTO Time (tId, sequence, start, end, semId_id) VALUES (%s, %s, %s, %s, %s)',(next_timeId,next_sequence,start,end,years))
+
+    add_time=f'/add_time'
+    return redirect(add_time)#back to homepage
+
+def delete_time_action(request,tId):
+
+    Time.objects.filter(tId=tId).delete()
+
+    add_time=f'/add_time'
+    return redirect(add_time)#back to homepage
+def sem_convert(request):
+    years = Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
+
+    new_year = 0
+    if years[0].sem == 4:
+        new_year = years[0].semId + 7
+    return render(request, 'sem_convert.html', {'years': years[0]})
+
+def sem_convert_action(request):
+    semID  = request.POST['next_sem']
+    sem = int(semID) % 10
+    real_year = int(semID) // 10
+
+    text=['上','寒','下','暑']
+    semText = f'{real_year}{text[sem-1]}'
+
+    with connection.cursor() as cursor:
+        cursor.execute('INSERT INTO Semester (semID, real_year, sem, semText) VALUES (%s, %s, %s, %s)',(semID, real_year, sem, semText))
+
+    if sem == 4:
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE Students SET years_old=years_old+1')
+
+    sem_convert = f'/sem_convert'
+    return redirect(sem_convert)#back to homepage

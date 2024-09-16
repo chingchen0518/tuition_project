@@ -38,6 +38,9 @@ urlpatterns = [
     path('end_class_action/<int:cId>', my_app.views.end_class_action, name='end_class_action'),
     path('recover_class_action/<int:cId>', my_app.views.recover_class_action, name='recover_class_action'),
 
+    path('copy_class/<int:cId>', my_app.views.copy_class, name='copy_class'),
+    path('copy_class_action', my_app.views.copy_class_action, name='copy_class_action'),
+
     path('add_teacher', my_app.views.add_teacher, name='add_teacher'),
     path('add_teacher_action', my_app.views.add_teacher_action, name='add_teacher_action'),
     
@@ -63,6 +66,15 @@ urlpatterns = [
     path('add_student_action', my_app.views.add_student_action, name='add_student_action'),
     path('edit_student/<int:sId>', my_app.views.edit_student, name='edit_student'),
     path('edit_student_action/<int:sId>', my_app.views.edit_student_action, name='edit_student_action'),
+
+    path('add_time', my_app.views.add_time, name='add_time'),
+    path('add_time_action/<int:years>', my_app.views.add_time_action, name='add_time_action'),
+    path('delete_time_action/<int:tId>', my_app.views.delete_time_action, name='delete_time_action'),
+
+
+    path('sem_convert', my_app.views.sem_convert, name='sem_convert'),
+    path('sem_convert_action', my_app.views.sem_convert_action, name='sem_convert_action'),
+
 
 
 ]

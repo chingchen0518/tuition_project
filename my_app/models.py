@@ -73,3 +73,20 @@ class Payment(models.Model):
     date=models.DateField(null=True,blank=True)
     class Meta:
         db_table = 'Payment'
+
+class Semester(models.Model):
+    semId=models.IntegerField(default=1111,primary_key=True)
+    sem=models.IntegerField(default=1)
+    real_year=models.IntegerField(default=111)
+    semText=models.CharField(default="-", null=True, max_length=100)
+    class Meta:
+        db_table = 'Semester'
+
+class Time(models.Model):
+    tId=models.AutoField(primary_key=True)
+    semId=models.ForeignKey(Semester, on_delete=models.CASCADE, to_field='semId', auto_created=False, unique=False, default=0)
+    start=models.TimeField(null=True,blank=True)
+    end=models.TimeField(null=True,blank=True)
+    sequence=models.IntegerField(default=1)
+    class Meta:
+        db_table = 'Time'

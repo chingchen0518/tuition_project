@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>新增课程</title>
+  <title>編輯课程</title>
   <!-- 引入 Bootstrap CSS -->
     <link href= "{%static '/css/bootstrap_css/bootstrap.css' %}" type="text/css" rel="stylesheet"/>
     <link href= "{%static '/plugins/bootstrap/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
@@ -80,25 +80,11 @@
             <!-- 年份、星期幾、時間 -->
             <div class="mb-3 row">
                <!-- 年度 -->
-              <div class="col-3">
+            <!-- 年度 -->
+              <div class="col-2">
                 <label for="year" class="form-label">年度：</label>
-                    <select id="year" name="year" class="form-select" required>
-                        <option value="" disabled>選擇年份</option>
-                        <option value="113" {% if class_detail.year == 113 %}selected{% endif %}>113 / 2024</option>
-                        <option value="114" {% if class_detail.year == 114 %}selected{% endif %}>114 / 2025</option>
-                        <option value="115" {% if class_detail.year == 115 %}selected{% endif %} >115 / 2026</option>
-                        <option value="116" {% if class_detail.year == 116 %}selected{% endif %} >116 / 2027</option>
-                        <option value="117" {% if class_detail.year == 117 %}selected{% endif %} >117 / 2028</option>
-                        <option value="118" {% if class_detail.year == 118 %}selected{% endif %} >118 / 2029</option>
-                        <option value="119" {% if class_detail.year == 119 %}selected{% endif %} >119 / 2030</option>
-                        <option value="120" {% if class_detail.year == 120 %}selected{% endif %} >120 / 2031</option>
-                        <option value="121" {% if class_detail.year == 121 %}selected{% endif %} >121 / 2032</option>
-                        <option value="122" {% if class_detail.year == 122 %}selected{% endif %} >122 / 2033</option>
-                        <option value="123" {% if class_detail.year == 123 %}selected{% endif %} >123 / 2034</option>
-                        <option value="124" {% if class_detail.year == 124 %}selected{% endif %} >124 / 2035</option>
-                        <option value="125" {% if class_detail.year == 125 %}selected{% endif %} >125 / 2036</option>
-
-                    </select>
+                <input type="text" class="form-control" value="{{ years.semText }}" readonly>
+                <input style="display:none;" type="number" id="year" class="form-control" name="year" placeholder="年度" value="{{ years.semId }}" readonly>
               </div>
 
 
@@ -118,16 +104,31 @@
               </div>
 
                 <!-- 時間 -->
-              <div class="col-3">
+                <div class="col-3">
                 <label for="time" class="form-label" >時間</label>
 {#                <div class="custom-select">#}
-                    <input type="time" id="time" class="form-control" name="time" value="{{ class_detail.time |time:"H:i" }}" required>
+                  <select class="form-select" name="time" required id="time">
+                      <option value="" disabled selected>選擇時間</option>
+                      {% for i in time %}
+                            <option value="{{ i.start |date:"H:i" }}" {% if class_detail.time == i.start%} selected{% endif %}>
+                                {{ i.start |date:"H:i" }} - {{ i.end |date:"H:i" }}
+                            </option>
+                      {% endfor %}
+
+                  </select>
 {#                </div>#}
               </div>
+{#{{ class_detail.time |time:"H:i" }}#}
 
-              <div class="col-3">
+              <div class="col-2">
                 <label for="quota" class="form-label">名額：</label>
                 <input type="number" id="quota" class="form-control" name="quota" placeholder="名額" max="99" value="{{ class_detail.quota }}"required>
+              </div>
+
+
+              <div class="col-2">
+                <label for="class_period" class="form-label">期數：</label>
+                <input type="number" id="class_period" class="form-control" name="class_period" placeholder="期數" max="10" value="{{ class_detail.periods }}" required>
               </div>
 
             </div>
