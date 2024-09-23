@@ -2,16 +2,17 @@ from django.shortcuts import HttpResponse, render, redirect
 import json,os
 from django.db.models import Max
 from datetime import datetime, timedelta
+from django.core.exceptions import ObjectDoesNotExist
 
 
 from django.http import JsonResponse
 from django.db import connection
 
 from django.shortcuts import render
-import pdb
+import hashlib
 
 #include table
-from my_app.models import Students, Enrolled, Class, Classroom, Teacher,Category,Payment,Time
+from my_app.models import Students, Enrolled, Class, Classroom, Teacher, Category, Payment, Time, Account
 from my_app.models import Semester
 
 # Create your views here.
@@ -54,13 +55,13 @@ def student_detail(request,sId):
     tingkat = ['xxx','國一','國二','國三','高一','高二','高三']
     class_taken= Class.objects.raw('''SELECT year,eId,cId,day,time,remark,period,subject,category,Enrolled.cId_id,
                                         CASE
-                                            WHEN (SELECT COUNT(amount) AS payment FROM Payment WHERE sId_id=5 AND Payment.eId_id=Enrolled.eId) > 0 THEN (SELECT COUNT(amount) FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId)
+                                            WHEN (SELECT COUNT(amount) AS payment FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId) > 0 THEN (SELECT COUNT(amount) FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId)
                                             ELSE 0
                                         END AS payment
                                         FROM Enrolled
                                         JOIN Class ON Class.cId = Enrolled.cId_id
                                         WHERE Enrolled.sId_id = %s
-                                        ''',(sId,sId))
+                                        ''',(sId,sId,sId))
 
     return render(request, 'student_detail.html',{'student_detail': student_detail[0],'tingkat':tingkat,'class_taken':class_taken})
 
@@ -98,20 +99,37 @@ def class_detail(request,cId):
     return render(request, 'class_detail.html',{'class_detail': class_detail[0],'students':students})
 
 def add_category(request):
-    return render(request, 'add_category.html')
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+            category = Category.objects.raw('SELECT * FROM Category')
+
+            return render(request, 'add_category.html',{'category':category})
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
 
 def add_category_action(request):
     category = request.POST['category']
 
-    latest_id = Category.objects.latest('catId')
-    latest_id = latest_id.catId
-    latest_id = latest_id + 1
+    try:
+        latest_id = Category.objects.latest('catId')
+        latest_id = latest_id.catId
+        latest_id = latest_id + 1
+    except ObjectDoesNotExist:
+        latest_id=0
 
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO Category VALUES (%s, %s)', (latest_id, category))
 
-    return redirect('/')  # back to homepage
+    add_category=f'/add_category'
+    return redirect(add_category)  # back to homepage
 
+def delete_category_action(request,catId):
+    Category.objects.filter(catId=catId).delete()
+
+    add_category=f'/add_category'
+    return redirect(add_category)  # back to homepage
 
 def add_class(request):
     category = Category.objects.raw('SELECT * FROM Category')
@@ -121,7 +139,16 @@ def add_class(request):
     time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY start')
     year = Semester.objects.raw('SELECT * FROM Semester WHERE semId=(SELECT MAX(semId) FROM Semester)')
 
-    return render(request, 'add_class.html',{'categories':category,'teachers':teacher,'classrooms':classroom,'time':time,'years':year[0]})
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+            return render(request, 'add_class.html',
+                          {'categories': category, 'teachers': teacher, 'classrooms': classroom, 'time': time,
+                           'years': year[0]})
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
+
 
 def add_class_action(request):
     category = request.POST['category']
@@ -231,7 +258,16 @@ def copy_class_action(request):
 
 
 def add_teacher(request):
-    return render(request, 'add_teacher.html')
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+            teacher = Teacher.objects.raw('SELECT * FROM Teacher')
+
+            return render(request, 'add_teacher.html',{'teacher':teacher})
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
+
 def add_teacher_action(request):
     name = request.POST['name']
     phone = request.POST['phone']
@@ -243,7 +279,16 @@ def add_teacher_action(request):
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO Teacher VALUES (%s, %s, %s, %s)', (latest_id,name,line,phone))
 
-    return redirect('/')#back to homepage
+    add_teacher=f'/add_teacher'
+    return redirect(add_teacher)#back to homepage
+
+def delete_teacher_action(request,tId):
+
+    Teacher.objects.filter(tId=tId).delete()
+
+    add_teacher=f'/add_teacher'
+    return redirect(add_teacher)#back to homepage
+
 
 def add_enroll(request,cId):
     student_list = Students.objects.raw('''SELECT sId,name FROM Students EXCEPT
@@ -357,7 +402,14 @@ def upload_payment_action(request,eId,sId,cId):
     return redirect(previous_page)#back to homepage
 
 def add_student(request):
-    return render(request, 'add_student.html')
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+
+            return render(request, 'add_student.html')
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
 
 def add_student_action(request):
     name=request.POST['name']
@@ -377,9 +429,15 @@ def add_student_action(request):
     return  redirect(student_list_page)#back to homepage
 
 def edit_student(request,sId):
-    Student = Students.objects.raw('Select * FROM Students WHERE sId=%s',[sId])
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+            Student = Students.objects.raw('Select * FROM Students WHERE sId=%s',[sId])
 
-    return render(request, 'edit_student.html',{'student':Student[0]})
+            return render(request, 'edit_student.html',{'student':Student[0]})
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
 
 def edit_student_action(request,sId):
     name=request.POST['name']
@@ -399,12 +457,19 @@ def edit_student_action(request,sId):
     return redirect(student_detail)#back to homepage
 
 def add_time(request):
-    years=Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
-    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY start')
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+            years=Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
+            time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY start')
 
-    return render(request, 'add_time.html',{'years':years[0],'time':time})
+            return render(request, 'add_time.html',{'years':years[0],'time':time})
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
 
 def add_time_action(request,years):
+
     start  = request.POST['start']
     start_str = datetime.strptime(start , '%H:%M')
 
@@ -436,12 +501,20 @@ def delete_time_action(request,tId):
     add_time=f'/add_time'
     return redirect(add_time)#back to homepage
 def sem_convert(request):
-    years = Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
+    if 'login' in request.session and request.session['login'] == 1:
+        if 'permission' in request.session and request.session['permission'] == 1:
+            years = Semester.objects.raw('SELECT * FROM Semester ORDER BY semId DESC')
 
-    new_year = 0
-    if years[0].sem == 4:
-        new_year = years[0].semId + 7
-    return render(request, 'sem_convert.html', {'years': years[0]})
+            new_year = 0
+            if years[0].sem == 4:
+                new_year = years[0].semId + 7
+            return render(request, 'sem_convert.html', {'years': years[0]})
+
+        else:
+            return render(request, 'no_access.html')
+    else:
+        return render(request, 'no_access.html')
+
 
 def sem_convert_action(request):
     semID  = request.POST['next_sem']
@@ -454,9 +527,76 @@ def sem_convert_action(request):
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO Semester (semID, real_year, sem, semText) VALUES (%s, %s, %s, %s)',(semID, real_year, sem, semText))
 
+
     if sem == 4:
         with connection.cursor() as cursor:
             cursor.execute('UPDATE Students SET years_old=years_old+1')
 
     sem_convert = f'/sem_convert'
     return redirect(sem_convert)#back to homepage
+
+def login_page(request):
+    # data="lee123456"
+    # a=hashlib.md5(data.encode()).hexdigest()
+    #
+    # with connection.cursor() as cursor:
+    #     cursor.execute('INSERT INTO Account (aId, username, password, permission) VALUES (%s, %s, %s, %s)',(2,'ching2chen',a,1))
+
+    return render(request, 'login_page.html')
+
+def login_page_action(request):
+    username = request.POST['username']
+    password = request.POST['password']
+
+    hashed_password = hashlib.md5(password.encode()).hexdigest()
+
+    account_data = Account.objects.raw('SELECT * FROM Account WHERE username=%s AND password=%s',[username,hashed_password])
+
+    if account_data:
+        request.session['username']=username
+        request.session['login'] = 1
+        request.session['permission'] = account_data[0].permission
+
+        if 'login' in request.session and request.session['login'] == 1:
+            student_list = f'/student_list'
+            return redirect(student_list)
+        else:
+            return redirect('/login_page')
+
+
+    else:
+        return redirect('/login_page')
+
+def logout_action(request):
+    request.session.flush()
+    return redirect('/')
+
+def add_account(request,repeat):
+
+    if 'login' in request.session and request.session['login'] == 1:
+        return render(request, 'add_account.html',{'repeat':repeat})
+    else:
+        return render(request, 'no_access.html')
+
+
+def add_account_action(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    permission = request.POST['permission']
+
+    hashed_password = hashlib.md5(password.encode()).hexdigest()
+
+    # account=Account.objects.raw('SELECT * FROM Account WHERE username=%s',[username])
+    account = Account.objects.filter(username=username).exists()
+
+    if account:
+        add_account = f'/add_account/1'
+        return redirect(add_account)
+    else:
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO Account (username, password, permission) VALUES (%s, %s, %s)',(username,hashed_password,permission))
+
+        add_account = f'/add_account/2'
+        return redirect(add_account)
+
+

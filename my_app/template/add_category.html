@@ -30,6 +30,16 @@
       <!-- 本頁面標題 -->
       <h1 id="title">新增課堂類別</h1>
 
+        <div class="d-flex flex-wrap">
+            {% for i in category %}
+                <div class=" m-3">
+                    <span class="bg-success text-white p-2 border border-success rounded fw-bold">{{ i.category}}</span>
+                    <a class="fw-bold p-t-2" href="{% url 'delete_category_action' i.catId %}" style="text-decoration: none; color:red; font-size:1.5em">X</a>
+
+                </div>
+            {% endfor %}
+        </div>
+
       <form id="add_category" method="POST" action="{% url 'add_category_action' %}">
           {% csrf_token %}
 
@@ -55,6 +65,7 @@
               </div>
             </div>
           </div>
+
         </div>
 
             <!-- 上傳表單按鈕 -->
@@ -64,7 +75,31 @@
       </form>
     </div>
 
+    <div class="modal" id="deleteConfirmModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">確定要刪除嗎</div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" id="delete_no" data-dismiss="modal">保留</button>
+                    <a id="delete_yes_link" href=""><button class="btn btn-danger" id="delete_yes">確認刪除</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <!-- 引入 Bootstrap JS -->
+<script src="../static/js/bootstrap_js/bootstrap.min.js"></script>
+
+  <script src="{% static '/plugins/jQuery/jquery.min.js' %}"></script>
+{#  <!-- Bootstrap jQuery -->#}
+  <script src="{% static '/plugins/bootstrap/bootstrap.min.js' %}" defer></script>
+{#  <!-- Slick Carousel -->#}
+  <script src="{% static '/plugins/slick/slick.min.js' %}"></script>
+  <script src="{% static 'plugins/slick/slick-animation.min.js'%}"></script>
+  <!-- Color box -->
+  <script src="{% static '/plugins/colorbox/jquery.colorbox.js' %}"></script>
+  <!-- shuffle -->
+  <script src="{% static '/plugins/shuffle/shuffle.min.js' %}" defer></script>
 <script src="../static/js/bootstrap_js/bootstrap.min.js"></script>
 <!-- 自定义表单验证 -->
 <script>
@@ -94,6 +129,28 @@
       alert("請填寫所有欄位，未填欄位為: " + unfilledFields.slice(0, -2));
     }
   }
+
+{#$(document).ready(function(){#}
+{#        // 监听删除按钮的点击事件#}
+{#        $('#delete_yes').click(function(){#}
+{#            // 显示模态框#}
+{#            $('#deleteConfirmModal').modal('show');#}
+{#        });#}
+{#    });#}
+{##}
+{#  $(document).ready(function() {#}
+{#            // 当模态框中的移除按钮被点击时#}
+{#            $('#deleteConfirmModal').on('show.bs.modal', function(e) {#}
+                {#element = document.getElementById('delete_button');#}
+                {#const catId = element.dataset.classId;#}
+{#                var catId = $(e.relatedTarget).data('class-id'); // 获取按钮上的 data-student-id 值#}
+{##}
+{#                var deleteUrl = '{% url "delete_category_action" catId=0 %}'; // 0 这里只是一个占位符，实际不会用到#}
+{#                deleteUrl = deleteUrl.replace('0', catId); // 替换占位符为实际的 studentId#}
+{#                $('#delete_yes_link').attr('href', deleteUrl); // 设置确认删除按钮的 href 属性#}
+{#            });#}
+{#        });#}
+  {##}
 </script>
 </body>
 </html>

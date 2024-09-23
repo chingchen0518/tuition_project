@@ -90,3 +90,11 @@ class Time(models.Model):
     sequence=models.IntegerField(default=1)
     class Meta:
         db_table = 'Time'
+
+class Account(models.Model):
+    aId=models.AutoField(primary_key=True)
+    username=models.CharField(default="-", null=True, max_length=100)
+    password=models.CharField(default="-", null=True, max_length=100)
+    permission=models.IntegerField(default=0)
+    class Meta:
+        db_table = 'Account'

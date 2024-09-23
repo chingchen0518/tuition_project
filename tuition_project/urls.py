@@ -43,9 +43,13 @@ urlpatterns = [
 
     path('add_teacher', my_app.views.add_teacher, name='add_teacher'),
     path('add_teacher_action', my_app.views.add_teacher_action, name='add_teacher_action'),
-    
+    path('delete_teacher_action/<int:tId>', my_app.views.delete_teacher_action, name='delete_teacher_action'),
+
+
     path('add_category', my_app.views.add_category, name='add_category'),
     path('add_category_action', my_app.views.add_category_action, name='add_category_action'),
+    path('delete_category_action/<int:catId>', my_app.views.delete_category_action, name='delete_category_action'),
+
 
     path('add_enroll/<int:cId>', my_app.views.add_enroll, name='add_enroll'),
     path('add_enroll_action/<int:cId>', my_app.views.add_enroll_action, name='add_enroll_action'),
@@ -75,6 +79,10 @@ urlpatterns = [
     path('sem_convert', my_app.views.sem_convert, name='sem_convert'),
     path('sem_convert_action', my_app.views.sem_convert_action, name='sem_convert_action'),
 
-
+    path('login_page', my_app.views.login_page, name='login_page'),
+    path('login_page_action', my_app.views.login_page_action, name='login_page_action'),
+    path('logout_action', my_app.views.logout_action, name='logout_action'),
+    path('add_account/<int:repeat>', my_app.views.add_account, name='add_account'),
+    path('add_account_action', my_app.views.add_account_action, name='add_account_action'),
 
 ]

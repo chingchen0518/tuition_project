@@ -74,7 +74,11 @@
                     </tr>
                 </tbody>
             </table>
-                <a class="btn btn-primary" id="edit_btn" href="{% url 'edit_student' sId=student_detail.sId %}">編輯資料</a>
+                {% if session.login %}
+                    {% if session.permission == 1 %}
+                        <a class="btn btn-primary" id="edit_btn" href="{% url 'edit_student' sId=student_detail.sId %}">編輯資料</a>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
 
@@ -112,7 +116,17 @@
                                 {% if i.payment >= i.period %}
                                     <span style="color:Green">&#10004;</span>
                                 {% else %}
-                                     <a href="{% url 'upload_payment' eId=i.eId %}" style="color:Red">X</a>
+
+
+                                    {% if session.login %}
+                                        {% if session.permission == 1 %}
+                                            <a href="{% url 'upload_payment' eId=i.eId %}" style="color:Red">X</a>
+                                        {% else %}
+                                            <span style="color:Red">X</span>
+                                        {% endif %}
+                                    {% else %}
+                                            <span style="color:Red">X</span>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                         </tr>

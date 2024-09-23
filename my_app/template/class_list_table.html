@@ -65,7 +65,11 @@
 
 
             <div id="add_class_div" class="col-2">
-                <a id="add_class" class="btn btn-success" href="{% url 'add_class' %}">新增課程</a>
+                {% if session.login %}
+                    {% if session.permission == 1 %}
+                        <a id="add_class" class="btn btn-success" href="{% url 'add_class' %}">新增課程</a>
+                    {% endif %}
+                {% endif %}
             </div>
 
 {#            <div class="form-check form-switch col-1">#}
@@ -128,17 +132,25 @@
                     <td class="center" >
 {#                        <div id="edit_delete_button">#}
                             <div class="mb-1">
-                                {% if available %}
-                                    <a data-toggle="modal" data-target="#endConfirmModal" class="btn btn-warning " data-class-id="{{ i.cId }}">結束</a>
-                                {% else %}
-                                    <a data-toggle="modal" data-target="#recoverConfirmModal" class="btn btn-success " data-class-id="{{ i.cId }}">恢復</a>
+                            {% if session.login %}
+                                {% if session.permission == 1 %}
+                                    {% if available %}
+                                        <a data-toggle="modal" data-target="#endConfirmModal" class="btn btn-warning " data-class-id="{{ i.cId }}">結束</a>
+                                    {% else %}
+                                        <a data-toggle="modal" data-target="#recoverConfirmModal" class="btn btn-success " data-class-id="{{ i.cId }}">恢復</a>
+                                    {% endif %}
                                 {% endif %}
+                            {% endif %}
                                 <a class="btn btn-blue" href="{% url 'class_detail' cId=i.cId %}">詳情</a>
                                 <a class="btn btn-blue" href="{% url 'add_enroll' cId=i.cId %}" >學生</a>
                             </div >
-                            <a class="btn btn-info" href="{% url 'edit_class' cId=i.cId %}">編輯</a>
-                            <a data-toggle="modal" data-target="#deleteConfirmModal" class="btn btn-danger" data-class-id="{{ i.cId }}">刪除</a>
-                            <a class="btn btn-outline-primary" href="{% url 'copy_class' cId=i.cId %}">複製</a>
+                            {% if session.login %}
+                                {% if session.permission == 1 %}
+                                    <a class="btn btn-info" href="{% url 'edit_class' cId=i.cId %}">編輯</a>
+                                    <a data-toggle="modal" data-target="#deleteConfirmModal" class="btn btn-danger" data-class-id="{{ i.cId }}">刪除</a>
+                                    <a class="btn btn-outline-primary" href="{% url 'copy_class' cId=i.cId %}">複製</a>
+                                {% endif %}
+                            {% endif %}
 {#                        </div>#}
                     </td>
                 </tr>
@@ -225,6 +237,7 @@
         $(document).ready(function() {
             // 当模态框中的移除按钮被点击时
             $('#deleteConfirmModal').on('show.bs.modal', function(e) {
+
                 var cId = $(e.relatedTarget).data('class-id'); // 获取按钮上的 data-student-id 值
                 var deleteUrl = '{% url "delete_class_action" cId=0 %}'; // 0 这里只是一个占位符，实际不会用到
                 deleteUrl = deleteUrl.replace('0', cId); // 替换占位符为实际的 studentId
