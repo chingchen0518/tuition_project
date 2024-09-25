@@ -142,9 +142,10 @@
                                 {% endif %}
                             {% endif %}
                                 <a class="btn btn-blue" href="{% url 'class_detail' cId=i.cId %}">詳情</a>
-                                <a class="btn btn-blue" href="{% url 'add_enroll' cId=i.cId %}" >學生</a>
                             </div >
                             {% if session.login %}
+                                <a class="btn btn-blue" href="{% url 'add_enroll' cId=i.cId %}" >學生</a>
+
                                 {% if session.permission == 1 %}
                                     <a class="btn btn-info" href="{% url 'edit_class' cId=i.cId %}">編輯</a>
                                     <a data-toggle="modal" data-target="#deleteConfirmModal" class="btn btn-danger" data-class-id="{{ i.cId }}">刪除</a>

@@ -33,22 +33,29 @@
 
     <div id="student_list">
         <h2>參與學生:</h2>
+        {% if session.login %}
         <a id="add_enroll" class="btn btn-primary" href="{% url 'add_enroll' cId=class_detail.cId %}">編輯學員</a>
+        {% endif %}
     </div>
 
     <table>
         <tr>
             <th>學生姓名</th>
             <th>學習狀況</th>
-            <th>編輯</th>
-            <th>移除</th>
+            {% if session.login %}
+                <th>編輯</th>
+                <th>移除</th>
+            {% endif %}
+
         </tr>
         {% for i in students %}
             <tr>
                 <td class="student_name">{{ i.name }}</td>
                 <td class="remark">{{ i.remark }}</td>
-                <td><a class="btn btn-primary" href="{% url 'edit_student_status' i.sId class_detail.cId %}">更新</a></td>
-                <td><button data-toggle="modal" data-target="#deleteConfirmModal" class="btn btn-danger" data-student-id="{{ i.sId }}">移除</button></td>
+                {% if session.login %}
+                    <td><a class="btn btn-primary" href="{% url 'edit_student_status' i.sId class_detail.cId %}">更新</a></td>
+                    <td><button data-toggle="modal" data-target="#deleteConfirmModal" class="btn btn-danger" data-student-id="{{ i.sId }}">移除</button></td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>
