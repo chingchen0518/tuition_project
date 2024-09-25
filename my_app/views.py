@@ -33,7 +33,7 @@ def student_list(request):
     student_list = Students.objects.raw('''SELECT *,
                                             CASE 
                                                 WHEN EXISTS (SELECT eId,period,COUNT(amount) AS paid_period,
-                                                          CASE WHEN (COUNT(amount)=period) THEN 1
+                                                          CASE WHEN (COUNT(amount)>=period) THEN 1
                                                           ELSE 0
                                                           END AS pay_or_not
                                                         FROM Enrolled
@@ -383,13 +383,18 @@ def upload_payment_action(request,eId,sId,cId):
         students = Students.objects.raw('SELECT sId,name FROM Students WHERE sId=%s',[sId])
         student_name = students[0].name
 
+        # 看課程名字
+        class_detail = Class.objects.filter(cId=cId).values('cId', 'subject', 'year')
+        semester=class_detail[0]['year']
+        class_name = class_detail[0]['subject']
+
         # 設置文件上傳的目錄
         upload_dir = 'my_app/static/img/receipt/'
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
         # 構造新的文件路徑，將文件名更改為 "xxx"
 
-        new_file_path = f'{upload_dir}{student_name}_{eId}_{latest_payment}{file_extension}'
+        new_file_path = f'{upload_dir}{student_name}_{class_name}({semester})_{latest_payment}{file_extension}'
         # 寫入文件到指定目錄
         with open(new_file_path, 'wb+') as destination:
             for chunk in file.chunks():

@@ -17,7 +17,7 @@
     <h1 style="margin-top:100px;">目前學期：{{ years.semText }}</h1>
 
 
-    <form action="{% url 'sem_convert_action' %}" method="POST">
+    <form action="{% url 'sem_convert_action' %}" method="POST" onsubmit="return confirmSubmission()">
         {% csrf_token %}
     
         {% if years.sem == 1 %}
@@ -61,7 +61,18 @@
 
     <br>
 
-
-
 </body>
+
+<script>
+function confirmSubmission() {
+    const userInput = prompt("請輸入'convert'確認進行學期結轉");
+    if (userInput === 'convert') {
+        return true; // 允许提交表单
+    } else {
+        alert("學期結轉取消，請輸入'convert'以確認結轉");
+        return false; // 阻止提交表单
+    }
+}
+</script>
+
 </html>

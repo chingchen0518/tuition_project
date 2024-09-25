@@ -1,0 +1,3 @@
+*.sqlite3
+my_app/static/img/receipt/*
+migrations/*
