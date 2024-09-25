@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from django.http import JsonResponse
 from django.db import connection
+from django.shortcuts import render
 
 from django.shortcuts import render
 import hashlib
