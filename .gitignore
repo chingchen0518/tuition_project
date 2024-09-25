@@ -1,3 +1,4 @@
 *.sqlite3
 my_app/static/img/receipt/*
-migrations/*
+my_app/migrations/*
+my_app/__pycache__/*
