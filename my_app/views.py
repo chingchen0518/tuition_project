@@ -526,7 +526,8 @@ def sem_convert(request):
             new_year = 0
             if years[0].sem == 4:
                 new_year = years[0].semId + 7
-            return render(request, 'sem_convert.html', {'years': years[0]})
+            # return render(request, 'sem_convert.html', {'years': years[0]})
+            return render(request, 'no_access.html')
 
         else:
             return render(request, 'no_access.html')
@@ -592,7 +593,8 @@ def logout_action(request):
 def add_account(request,repeat):
 
     if 'login' in request.session and request.session['login'] == 1:
-        return render(request, 'add_account.html',{'repeat':repeat})
+        return render(request, 'no_access.html')
+        # return render(request, 'add_account.html',{'repeat':repeat})
     else:
         return render(request, 'no_access.html')
 
