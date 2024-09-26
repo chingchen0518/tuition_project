@@ -162,10 +162,13 @@ def add_class_action(request):
     day = request.POST['day']
     years_old = request.POST['age']
     class_period = request.POST['class_period']
+    try:
+        latest_id = Class.objects.latest('cId')
+        latest_id = latest_id.cId
+        cId = latest_id + 1
+    except ObjectDoesNotExist:
+        cId = 0
 
-    latest_id = Class.objects.latest('cId')
-    latest_id = latest_id.cId
-    cId = latest_id + 1
 
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO Class VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)', (cId,category,subject,time,year,quota,classroom,teacher,day,years_old,class_period,1))
@@ -246,9 +249,13 @@ def copy_class_action(request):
     years_old = request.POST['age']
     class_period = request.POST['class_period']
 
-    latest_id = Class.objects.latest('cId')
-    latest_id = latest_id.cId
-    cId = latest_id + 1
+    try:
+        latest_id = Class.objects.latest('cId')
+        latest_id = latest_id.cId
+        cId = latest_id + 1
+    except ObjectDoesNotExist:
+        cId = 0
+
 
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO Class VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)', (cId,category,subject,time,year,quota,classroom,teacher,day,years_old,class_period,1))
@@ -273,10 +280,13 @@ def add_teacher_action(request):
     name = request.POST['name']
     phone = request.POST['phone']
     line = request.POST['line']
+    try:
+        latest_id = Teacher.objects.latest('tId')
+        latest_id = latest_id.catId
+        latest_id = latest_id + 1
+    except ObjectDoesNotExist:
+        latest_id = 0
 
-    latest_id = Teacher.objects.latest('tId')
-    latest_id = latest_id.tId
-    latest_id=latest_id + 1
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO Teacher VALUES (%s, %s, %s, %s)', (latest_id,name,line,phone))
 
@@ -307,10 +317,12 @@ def add_enroll_action(request,cId):
     period=period[0].periods
 
     for i in new_students:
-        # pdb.set_trace()
-        latest_id = Enrolled.objects.latest('eId')
-        latest_id = latest_id.eId
-        latest_id=latest_id + 1
+        try:
+            latest_id = Enrolled.objects.latest('eId')
+            latest_id = latest_id.catId
+            latest_id = latest_id + 1
+        except ObjectDoesNotExist:
+            latest_id = 0
 
         with connection.cursor() as cursor:
             cursor.execute('INSERT INTO Enrolled VALUES (%s, %s, %s, %s,%s)', (latest_id,cId,i,"-",period))
