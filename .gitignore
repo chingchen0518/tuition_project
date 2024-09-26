@@ -2,3 +2,4 @@
 my_app/static/img/receipt/*
 my_app/migrations/*
 my_app/__pycache__/*
+venv/*
