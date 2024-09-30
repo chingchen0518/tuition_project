@@ -1,8 +1,0 @@
-*.sqlite3
-my_app/static/img/receipt/*
-my_app/migrations/*
-my_app/__pycache__/*
-__pycache__/
-*.pyc
-venv/*
-opendjango.exe
