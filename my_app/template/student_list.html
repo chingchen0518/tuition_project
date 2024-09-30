@@ -88,7 +88,14 @@
                                 {{ i.name }}
                             </a>
                         </td>
-                        <td class="years_old">{{ tingkat|get_item:i.years_old }}</td>
+                        <td class="years_old">
+                            {% if i.years_old < 50 %}
+                                {{ tingkat|get_item:i.years_old }}
+                            {% else %}
+                                {{ tingkat_tiada|get_item:i.years_old }}
+                            {% endif %}
+
+                        </td>
                         <td class="school">{{ i.school }}</td>
                         <td class="remark">{{ i.remarks }}</td>
                         <td class="payment">

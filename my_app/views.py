@@ -47,9 +47,10 @@ def student_list(request):
                                         END AS fully_paid
                                         FROM Students s ORDER BY years_old''')
 
-    tingkat = ['xxx','國一','國二','國三','高一','高二','高三']
+    tingkat_ada_convert = ['xxx','國小一','國小二','國小三','國小四','國小五','國小六','國一','國二','國三','高一','高二','高三']
+    tingkat_tiada_convert = ['xxx','兒美小','兒美中','兒美大','留學','社會人士','其他']
 
-    return render(request, 'student_list.html',{'student_list':student_list,'tingkat':tingkat})
+    return render(request, 'student_list.html',{'student_list':student_list,'tingkat':tingkat_ada_convert,'tingkat_tiada':tingkat_tiada_convert})
 
 def student_detail(request,sId):
     student_detail = Students.objects.raw('''SELECT * FROM Students WHERE sId=%s''',[sId])
@@ -489,16 +490,17 @@ def add_time(request):
 def add_time_action(request,years):
 
     start  = request.POST['start']
+    duration = float(request.POST['duration'])
     start_str = datetime.strptime(start , '%H:%M')
 
-    end_str = start_str + timedelta(hours=2)
-    end = end_str.strftime('%H:%M')
+    # timedelta(hours=1, minutes=30)
+    if(duration % 1 == 0.5):
+        hour = duration-0.5
+        end_str = start_str + timedelta(hours=hour,minutes=30)
+    else:
+        end_str = start_str + timedelta(hours=duration)
 
-    # latest_sequence = Time.objects.raw('SELECT * FROM Time WHERE semId_id=%s ORDER BY sequence DESC',[years])[0]
-    #
-    # if latest_sequence.exists():
-    #     next_sequence = latest_sequence.sequence + 1
-    # else:
+    end = end_str.strftime('%H:%M')
 
     next_sequence = 1
 
@@ -549,7 +551,7 @@ def sem_convert_action(request):
 
     if sem == 4:
         with connection.cursor() as cursor:
-            cursor.execute('UPDATE Students SET years_old=years_old+1')
+            cursor.execute('UPDATE Students SET years_old=years_old+1 WHERE years_old between 7 AND 17')
 
     sem_convert = f'/sem_convert'
     return redirect(sem_convert)#back to homepage
