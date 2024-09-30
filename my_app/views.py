@@ -282,7 +282,7 @@ def add_teacher_action(request):
     line = request.POST['line']
     try:
         latest_id = Teacher.objects.latest('tId')
-        latest_id = latest_id.catId
+        latest_id = latest_id.tId
         latest_id = latest_id + 1
     except ObjectDoesNotExist:
         latest_id = 0
@@ -319,7 +319,7 @@ def add_enroll_action(request,cId):
     for i in new_students:
         try:
             latest_id = Enrolled.objects.latest('eId')
-            latest_id = latest_id.catId
+            latest_id = latest_id.eId
             latest_id = latest_id + 1
         except ObjectDoesNotExist:
             latest_id = 0
