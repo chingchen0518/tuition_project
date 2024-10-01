@@ -70,6 +70,7 @@ urlpatterns = [
     path('add_student_action', my_app.views.add_student_action, name='add_student_action'),
     path('edit_student/<int:sId>', my_app.views.edit_student, name='edit_student'),
     path('edit_student_action/<int:sId>', my_app.views.edit_student_action, name='edit_student_action'),
+    path('delete_student_action/<int:sId>', my_app.views.delete_student_action, name='delete_student_action'),
 
     path('add_time', my_app.views.add_time, name='add_time'),
     path('add_time_action/<int:years>', my_app.views.add_time_action, name='add_time_action'),

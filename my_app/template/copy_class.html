@@ -66,13 +66,26 @@
                 <label for="tingkat" class="form-label">年級：</label>
                     <select id="age" name="age" class="form-select" required>
                         <option value="" disabled>全部</option>
+                        <option value="兒美小" {% if class_detail.years_old == "兒美小" %}selected{% endif %}>兒美小</option>
+                        <option value="兒美中" {% if class_detail.years_old == "兒美中" %}selected{% endif %}>兒美中</option>
+                        <option value="兒美大" {% if class_detail.years_old == "兒美大" %}selected{% endif %}>兒美大</option>
+                        <option value="國小一" {% if class_detail.years_old == "國小一" %}selected{% endif %}>國小一</option>
+                        <option value="國小二" {% if class_detail.years_old == "國小二" %}selected{% endif %}>國小二</option>
+                        <option value="國小三" {% if class_detail.years_old == "國小三" %}selected{% endif %}>國小三</option>
+                        <option value="國小四" {% if class_detail.years_old == "國小四" %}selected{% endif %}>國小四</option>
+                        <option value="國小五" {% if class_detail.years_old == "國小五" %}selected{% endif %}>國小五</option>
+                        <option value="國小六" {% if class_detail.years_old == "國小六" %}selected{% endif %}>國小六</option>
                         <option value="國一" {% if class_detail.years_old == "國一" %}selected{% endif %}>國一</option>
                         <option value="國二" {% if class_detail.years_old == "國二" %}selected{% endif %}>國二</option>
                         <option value="國三" {% if class_detail.years_old == "國三" %}selected{% endif %}>國三</option>
                         <option value="高一" {% if class_detail.years_old == "高一" %}selected{% endif %}>高一</option>
                         <option value="高二" {% if class_detail.years_old == "高二" %}selected{% endif %}>高二</option>
                         <option value="高三" {% if class_detail.years_old == "高三" %}selected{% endif %}>高三</option>
+                        <option value="留學" {% if class_detail.years_old == "留學" %}selected{% endif %}>留學</option>
+                        <option value="社會人" {% if class_detail.years_old == "社會人" %}selected{% endif %}>社會人</option>
                         <option value="其他" {% if class_detail.years_old == "其他" %}selected{% endif %}>其他</option>
+
+
                     </select>
               </div>
             </div>

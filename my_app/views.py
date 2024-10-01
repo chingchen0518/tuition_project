@@ -26,7 +26,7 @@ def homepage(request):
     classroom=[1,2,3,4,5,6]
     Days=['一','二','三','四','五','六','日']
 
-    time = Time.objects.raw('SELECT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY sequence')
+    time = Time.objects.raw('SELECT DISTINCT * FROM Time WHERE semId_id=(SELECT MAX(semId) FROM Semester) ORDER BY start')
     return render(request, 'homepage.html',{'class':class_list,'Days':Days,'time':time,'classroom':classroom})
 
 
@@ -54,7 +54,6 @@ def student_list(request):
 
 def student_detail(request,sId):
     student_detail = Students.objects.raw('''SELECT * FROM Students WHERE sId=%s''',[sId])
-    tingkat = ['xxx','國一','國二','國三','高一','高二','高三']
     class_taken= Class.objects.raw('''SELECT year,eId,cId,day,time,remark,period,subject,category,Enrolled.cId_id,
                                         CASE
                                             WHEN (SELECT COUNT(amount) AS payment FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId) > 0 THEN (SELECT COUNT(amount) FROM Payment WHERE sId_id=%s AND Payment.eId_id=Enrolled.eId)
@@ -65,7 +64,11 @@ def student_detail(request,sId):
                                         WHERE Enrolled.sId_id = %s
                                         ''',(sId,sId,sId))
 
-    return render(request, 'student_detail.html',{'student_detail': student_detail[0],'tingkat':tingkat,'class_taken':class_taken})
+    tingkat_ada_convert = ['xxx', '國小一', '國小二', '國小三', '國小四', '國小五', '國小六', '國一', '國二', '國三',
+                           '高一', '高二', '高三']
+    tingkat_tiada_convert = ['xxx', '兒美小', '兒美中', '兒美大', '留學', '社會人士', '其他']
+
+    return render(request, 'student_detail.html',{'student_detail': student_detail[0],'tingkat':tingkat_ada_convert,'tingkat_tiada':tingkat_tiada_convert,'class_taken':class_taken})
 
 def class_list(request,available):
 
@@ -474,6 +477,13 @@ def edit_student_action(request,sId):
 
     student_detail=f'/student_detail/{sId}'
     return redirect(student_detail)#back to homepage
+
+def delete_student_action(request,sId):
+    with connection.cursor() as cursor:
+        cursor.execute('DELETE FROM Students WHERE sId=%s',[sId])
+
+    student_list = f'/student_list'
+    return redirect(student_list)  # back to homepage
 
 def add_time(request):
     if 'login' in request.session and request.session['login'] == 1:
